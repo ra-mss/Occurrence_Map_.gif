@@ -34,3 +34,25 @@ ggplot() +
   ggtitle("World Map (rnaturalearth)")+
   coord_sf(xlim = c(-30,-170), ylim = c(-57,74)) 
 
+##Animar mapa de ocurrencias
+##Elige el año, en este caso 2019 y agrega una columna para crear la fecha en formato 'date'
+oyster2019<- oysterc %>% 
+  filter(year==2019)
+oyster2019$date <- as.Date(with(oyster2019, paste(day, month, year, sep = "-")), "%d-%m-%Y")  
+oyster2019 %>% 
+  arrange(month, day)
+
+#Crea el mapa con las características deseadas, y agrega los puntos utilizando los valores de 'x' y 'y' para las columnas de longitud y latitud, respect 
+p <- ggplot()+
+  geom_sf(data = world) + theme_dark() + 
+  geom_point(data=oyster2019, 
+             aes(x = decimalLongitude, y = decimalLatitude, col=month), 
+             pch=20, size=2.5) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  coord_sf(xlim = c(-30,-170), ylim = c(-57,74)) +
+  scale_color_gradient(low = "blue", high = "red") +
+  transition_time(date) + 
+  labs(title = "Haematopus palliatus ocurrence   ||   Date: {frame_time}")
+
+#Configurar los frames y fps del gif  
+animate(p, nframes=365, fps=3)
